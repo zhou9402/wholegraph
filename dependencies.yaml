@@ -64,6 +64,21 @@ files:
       key: requires
     includes:
       - python_build_wheel
+  py_run_pylibwholegraph:
+    output: pyproject
+    pyproject_dir: python/pylibwholegraph
+    extras:
+      table: project
+    includes:
+      - run
+  py_test_pylibwholegraph:
+    output: pyproject
+    pyproject_dir: python/pylibwholegraph
+    extras:
+      table: project.optional-dependencies
+      key: test
+    includes:
+      - test_python
 channels:
   - rapidsai
   - rapidsai-nightly
@@ -84,10 +99,10 @@ dependencies:
           - cxx-compiler
           - cython>=3.0.0
           - &doxygen doxygen==1.9.1
-          - libraft-headers==24.10.*,>=0.0.0a0
-          - librmm==24.10.*,>=0.0.0a0
+          - libraft-headers==24.12.*,>=0.0.0a0
+          - librmm==24.12.*,>=0.0.0a0
           - nanobind>=0.2.0
-          - nccl
+          - &nccl nccl>=2.19
     specific:
       - output_types: conda
         matrices:
@@ -210,24 +225,24 @@ dependencies:
               - python>=3.10,<3.13
   run:
     common:
-      - output_types: [conda, requirements]
-        packages: []
+      - output_types: [conda, pyproject, requirements]
+        packages:
+          - numpy>=1.23,<3.0a0
   test_cpp:
     common:
       - output_types: [conda]
         packages:
-          - nccl
+          - *nccl
   test_python:
     common:
       - output_types: [conda]
         packages:
           - c-compiler
           - cxx-compiler
-          - nccl
-      - output_types: [conda, requirements]
-        packages:
+          - *nccl
           - ninja
-          - numpy>=1.23,<3.0a0
+      - output_types: [conda, pyproject, requirements]
+        packages:
           - pytest
           - pytest-forked
           - pytest-xdist
@@ -285,13 +300,13 @@ dependencies:
               # If conda-forge supports the new cuda-* packages for CUDA 11.8
               # at some point, then we can fully support/properly specify
               # this environment.
-              - pytorch=2.0.0
+              - &pytorch pytorch>=2.0,<2.4.0a0
               - pytorch-cuda=11.8
           - matrix:
               arch: aarch64
               cuda: "11.8"
             packages:
-              - pytorch=2.0.0
+              - *pytorch
               - pytorch-cuda=11.8
           - matrix:
             packages:
@@ -318,7 +333,7 @@ dependencies:
     common:
       - output_types: [conda]
         packages:
-          - pytorch=2.0.0
+          - *pytorch
           - cpuonly
   clang_tools:
     common:

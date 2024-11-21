@@ -27,7 +27,6 @@ from libcpp cimport bool
 from cpython cimport Py_buffer
 from cpython cimport array
 import array
-import numpy as np
 from cpython.ref cimport PyObject, Py_INCREF, Py_DECREF
 from cpython.object cimport Py_TYPE, PyObject_CallObject
 from cpython.tuple cimport *
@@ -61,6 +60,7 @@ cdef extern from "wholememory/wholememory.h":
         WHOLEMEMORY_MT_CONTINUOUS           "WHOLEMEMORY_MT_CONTINUOUS"
         WHOLEMEMORY_MT_CHUNKED              "WHOLEMEMORY_MT_CHUNKED"
         WHOLEMEMORY_MT_DISTRIBUTED          "WHOLEMEMORY_MT_DISTRIBUTED"
+        WHOLEMEMORY_MT_HIERARCHY            "WHOLEMEMORY_MT_HIERARCHY"
 
     ctypedef enum wholememory_memory_location_t:
         WHOLEMEMORY_ML_NONE                 "WHOLEMEMORY_ML_NONE"
@@ -129,6 +129,12 @@ cdef extern from "wholememory/wholememory.h":
 
     cdef wholememory_error_code_t wholememory_get_communicator(wholememory_comm_t * comm,
                                                                wholememory_handle_t wholememory_handle)
+
+    cdef wholememory_error_code_t wholememory_get_local_communicator(wholememory_comm_t * comm,
+                                                                     wholememory_handle_t wholememory_handle)
+
+    cdef wholememory_error_code_t wholememory_get_cross_communicator(wholememory_comm_t * comm,
+                                                                     wholememory_handle_t wholememory_handle)
 
     cdef wholememory_memory_type_t wholememory_get_memory_type(wholememory_handle_t wholememory_handle)
 
@@ -226,6 +232,7 @@ cpdef enum WholeMemoryMemoryType:
     MtContinuous = WHOLEMEMORY_MT_CONTINUOUS
     MtChunked = WHOLEMEMORY_MT_CHUNKED
     MtDistributed = WHOLEMEMORY_MT_DISTRIBUTED
+    MtHierarchy = WHOLEMEMORY_MT_HIERARCHY
 
 cpdef enum WholeMemoryMemoryLocation:
     MlNone = WHOLEMEMORY_ML_NONE
@@ -1340,6 +1347,16 @@ cdef class PyWholeMemoryHandle:
     def get_communicator(self):
         py_comm = PyWholeMemoryComm()
         check_wholememory_error_code(wholememory_get_communicator(&py_comm.comm_id, self.wholememory_handle))
+        return py_comm
+
+    def get_local_communicator(self):
+        py_comm = PyWholeMemoryComm()
+        check_wholememory_error_code(wholememory_get_local_communicator(&py_comm.comm_id, self.wholememory_handle))
+        return py_comm
+
+    def get_cross_communicator(self):
+        py_comm = PyWholeMemoryComm()
+        check_wholememory_error_code(wholememory_get_cross_communicator(&py_comm.comm_id, self.wholememory_handle))
         return py_comm
 
     def get_memory_type(self):
